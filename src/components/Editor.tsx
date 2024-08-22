@@ -2,7 +2,7 @@ import React from 'react';
 import EditorKit, { EditorKitDelegate } from '@standardnotes/editor-kit';
 import MarkdownEditor from '@uiw/react-markdown-editor';
 import { Commands } from '@uiw/react-markdown-editor/cjs/components/ToolBar';
-import type { OutgoingItemMessagePayload } from '@standardnotes/snjs';
+import { Sandbox } from './Sandbox';
 
 export interface EditorInterface {
   preview: boolean;
@@ -10,20 +10,18 @@ export interface EditorInterface {
   colorMode: string;
 }
 
-const initialState = {
-  preview: false,
-  text: '',
-  colorMode: 'light',
-};
-
-// let keyMap = new Map();
-
 export default class Editor extends React.Component<{}, EditorInterface> {
   private editorKit?: EditorKit;
+  private isMobile: boolean = window.innerWidth < 768;
+  private initialState = {
+    preview: false,
+    text: '',
+    colorMode: this.isMobile ? 'dark' : 'light',
+  };
 
   constructor(props: EditorInterface) {
     super(props);
-    this.state = initialState;
+    this.state = this.initialState;
   }
 
   componentDidMount() {
@@ -32,8 +30,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
 
   configureEditorKit = () => {
     const delegate: EditorKitDelegate = {
-      /** This loads every time a different note is loaded */
-      onNoteValueChange: async (note: OutgoingItemMessagePayload) => {
+      onNoteValueChange: async (note) => {
         this.setState({
           preview: this.editorKit?.getComponentDataValueForKey('mode') || false,
         });
@@ -45,6 +42,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
       handleRequestForContentHeight: () => undefined,
       onThemesChange: () => {
         this.setColorMode(
+          // @ts-ignore
           this.editorKit?.componentRelay?.component.activeThemes || [],
         );
       },
@@ -77,10 +75,6 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   };
 
   saveNote = (text: string) => {
-    /**
-     * This will work in an SN context, but breaks the standalone editor,
-     * so we need to catch the error
-     */
     try {
       this.editorKit?.onEditorValueChanged(text);
     } catch (error) {
@@ -101,9 +95,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     this.editorKit?.setComponentDataValueForKey('mode', isPreview);
   };
 
-  isMobile: boolean = window.innerWidth < 768;
-
-  toolbars: Commands[] = this.isMobile
+  private toolbars: Commands[] = this.isMobile
     ? ['undo', 'redo', 'bold', 'italic']
     : [
         'undo',

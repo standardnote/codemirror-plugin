@@ -151,6 +151,7 @@ code {
 
     .cm-gutters {
       font-size: 14px;
+
       .cm-gutterElement {
         opacity: 0.4;
       }
@@ -206,6 +207,7 @@ code {
       }
     }
   }
+
   .md-editor-preview {
     background-color: transparent;
   }
@@ -218,6 +220,14 @@ code {
 .md-editor-inner,
 .cm-editor {
   height: 100%;
+}
+
+#sandbox-preview {
+  opacity: 1;
+  z-index: 1;
+  background-color: white;
+  user-select: initial;
+  pointer-events: initial;
 }
 
 @media (max-width: 650px) {
@@ -237,6 +247,7 @@ code {
         display: block;
         width: 100% !important;
       }
+
       .md-editor-content-editor {
         display: none;
       }
