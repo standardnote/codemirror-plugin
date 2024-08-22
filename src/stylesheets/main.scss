@@ -206,6 +206,9 @@ code {
       }
     }
   }
+  .md-editor-preview {
+    background-color: transparent;
+  }
 }
 
 #root,
@@ -218,12 +221,26 @@ code {
 }
 
 @media (max-width: 650px) {
-  #root .md-editor .md-editor-toolbar button {
-    height: 32px;
-    width: 32px;
-  }
-  #root .md-editor .md-editor-preview {
-    width: 100% !important;
+  #root {
+    .md-editor .md-editor-toolbar button {
+      height: 32px;
+      width: 32px;
+    }
+
+    .md-editor-preview {
+      display: none;
+      border-left: none;
+    }
+
+    .sn-preview {
+      .md-editor-preview {
+        display: block;
+        width: 100% !important;
+      }
+      .md-editor-content-editor {
+        display: none;
+      }
+    }
   }
 
   h1 {

@@ -95,6 +95,9 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     this.editorKit?.componentRelay?.sendCustomEvent('blur', {});
 
   onPreviewMode = (isPreview: boolean) => {
+    document.querySelector('.sn-editor')!.className = isPreview
+      ? 'sn-editor sn-preview'
+      : 'sn-editor';
     this.editorKit?.setComponentDataValueForKey('mode', isPreview);
   };
 
@@ -122,7 +125,10 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   render() {
     const { text, preview, colorMode } = this.state;
     return (
-      <div className="sn-editor" data-color-mode={colorMode}>
+      <div
+        className={preview ? 'sn-editor sn-preview' : 'sn-editor'}
+        data-color-mode={colorMode}
+      >
         <MarkdownEditor
           value={text}
           onBlur={this.onBlur}
