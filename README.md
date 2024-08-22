@@ -1,0 +1,2 @@
+# StandardNotes CodeMirror plugin
+

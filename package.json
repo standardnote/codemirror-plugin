@@ -1,0 +1,94 @@
+{
+  "name": "codemirror",
+  "version": "0.1.0",
+  "description": "CodeMirror is a code editor component for the web",
+  "keywords": [
+    "Standard Notes",
+    "Standard Notes Extensions"
+  ],
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/standardnotes/editor-template-cra-typescript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/standardnotes/editor-template-cra-typescript/issues"
+  },
+  "sn": {
+    "main": "build/index.html"
+  },
+  "homepage": ".",
+  "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "start": "PORT=1080 react-app-rewired start",
+    "build": "react-app-rewired build",
+    "prepublishOnly": "npm run build",
+    "clean-deploy-cache": "rm -rf node_modules/.cache/gh-pages",
+    "predeploy": "yarn run pretty && yarn run build && yarn clean-deploy-cache",
+    "deploy-build": "yarn run predeploy && gh-pages -b build -d build",
+    "deploy-dev": "yarn run predeploy && gh-pages -b dev -d build",
+    "deploy-stable": "yarn run predeploy && gh-pages -b gh-pages -d build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject",
+    "serve": "serve -s -p 3000 build",
+    "server-public": "http-server -p 3000 --cors",
+    "server-root": "http-server ./ -p 3000 --cors",
+    "server": "http-server ./build -p 3000 --cors",
+    "pretty": "prettier --write 'src/**/*.{html,css,scss,js,jsx,ts,tsx,json}' README.md",
+    "prepare": "husky install"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "lint-staged": {
+    "README.md": [
+      "prettier --write"
+    ],
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@standardnotes/editor-kit": "2.3.1",
+    "@standardnotes/stylekit": "5.29.3",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "^22.5.0",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "gh-pages": "^6.1.1",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.9",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-app-rewired": "^2.2.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "sass": "1.77.8",
+    "source-map-explorer": "^2.5.3",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "@uiw/react-markdown-editor": "^6.1.2"
+  }
+}
