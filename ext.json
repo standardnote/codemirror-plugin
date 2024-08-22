@@ -1,0 +1,19 @@
+{
+  "name": "CodeMirror",
+  "content_type": "SN|Component",
+  "main": "dist/index.html",
+  "area": "editor-editor",
+  "spellcheckControl": true,
+  "note_type": "markdown",
+  "file_type": "md",
+  "showInGallery": true,
+  "identifier": "com.sncommunity.codemirror",
+  "version": "1.0.0",
+  "url": "https://standardnote.github.io/codemirror-plugin/dist/index.html",
+  "download_url": "https://standardnote.github.io/codemirror-plugin/dist.zip",
+  "latest_url": "https://standardnote.github.io/codemirror-plugin/ext.json",
+  "publisher": "@ixiumu",
+  "description": "",
+  "base64Hash": "",
+  "binaryHash": ""
+}
