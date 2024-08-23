@@ -132,48 +132,58 @@ export default class Editor extends React.Component<{}, EditorInterface> {
 
   onModeChange = (mode: DisplayMode) => {
     if (this.state.mode !== mode) {
+      this.setState({ mode });
       // this.editorKit?.setComponentDataValueForKey('mode', mode);
       this.saveMetadata('mode', mode);
-      this.setState({ mode });
       document.getElementById('sn-editor')!.className =
         this.getEditorClassName(mode);
+
+      const btnExec = document.querySelector(
+        '.md-editor-toolbar-mode button:first-child',
+      );
+      if (btnExec) {
+        btnExec.className = mode === DisplayMode.sandbox ? 'active' : '';
+      }
     }
   };
 
-  getToolbars = (): Commands[] => {
-    const exec: ICommand = {
-      name: 'exec',
-      keyCommand: 'exec',
-      icon: (
-        <svg viewBox="0 0 48 48" fill="none" height="15" width="15">
-          <path
-            d="M21 6H9a3 3 0 0 0-3 3v22a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3V21M24 34v8"
-            stroke="currentColor"
-            stroke-width="5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="m32 6-4 4 4 4m6-8 4 4-4 4M14 42h20"
-            stroke="currentColor"
-            stroke-width="5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      ),
-      execute: ({ state, view }) => {
-        if (!state || !view) return;
-        this.onModeChange(
-          this.state.mode !== DisplayMode.sandbox
-            ? DisplayMode.sandbox
-            : DisplayMode.editor,
-        );
-      },
-    };
+  getToolbars = (postion?: string): Commands[] => {
+    if (postion === 'mode') {
+      const exec: ICommand = {
+        name: 'exec',
+        keyCommand: 'exec',
+        icon: (
+          <svg viewBox="0 0 48 48" fill="none" height="15" width="15">
+            <path
+              d="M21 6H9a3 3 0 0 0-3 3v22a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3V21M24 34v8"
+              stroke="currentColor"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="m32 6-4 4 4 4m6-8 4 4-4 4M14 42h20"
+              stroke="currentColor"
+              stroke-width="5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        ),
+        execute: ({ state, view }) => {
+          if (!state || !view) return;
+          this.onModeChange(
+            this.state.mode !== DisplayMode.sandbox
+              ? DisplayMode.sandbox
+              : DisplayMode.editor,
+          );
+        },
+      };
+      return [exec, 'preview'];
+    }
 
     return this.isMobile
-      ? ['undo', 'redo', 'bold', 'italic', exec]
+      ? ['undo', 'redo', 'bold', 'italic']
       : [
           'undo',
           'redo',
@@ -189,7 +199,6 @@ export default class Editor extends React.Component<{}, EditorInterface> {
           'todo',
           'link',
           'image',
-          exec,
         ];
   };
 
@@ -207,7 +216,10 @@ export default class Editor extends React.Component<{}, EditorInterface> {
           onFocus={this.onFocus}
           visible={mode === DisplayMode.preview}
           toolbars={this.getToolbars()}
+          toolbarsMode={this.getToolbars('mode')}
           autoFocus={true}
+          // renderPreview={() => null}
+          previewWidth={this.isMobile ? '100%' : '50%'}
           readOnly={readOnly}
           onPreviewMode={(isPreview) =>
             this.onModeChange(

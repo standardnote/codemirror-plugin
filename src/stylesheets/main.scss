@@ -145,10 +145,6 @@ code {
       width: 28px;
     }
 
-    .md-editor-toolbar-mode > button:nth-child(2) {
-      display: none !important;
-    }
-
     .cm-gutters {
       font-size: 14px;
 
@@ -206,6 +202,22 @@ code {
         }
       }
     }
+
+    /* cm-tooltip-autocomplete */
+    .cm-tooltip {
+      background-color: var(--color-canvas-subtle);
+      color: var(--color-fg-default);
+      border-color: var(--color-border-default);
+    }
+
+    .cm-tooltip-autocomplete ul li[aria-selected] {
+      background: var(--color-accent-fg, #0969da);
+      color: var(--color-fg-default);
+    }
+
+    .cm-tooltip-autocomplete-disabled ul li[aria-selected] {
+      background: var(--sn-stylekit-info-color, #555);
+    }
   }
 
   .md-editor-preview {
@@ -219,6 +231,7 @@ code {
     .md-editor {
       height: auto;
       flex: none;
+      --color-border-shadow: none;
     }
 
     .md-editor-preview {
@@ -272,7 +285,7 @@ code {
     .sn-preview {
       .md-editor-preview {
         display: block;
-        width: 100% !important;
+        width: 100%;
       }
 
       .md-editor-content-editor {

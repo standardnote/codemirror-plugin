@@ -7,17 +7,20 @@ export interface SandboxProps {
 export const Sandbox = ({ content, runInDoc, isVisible }: SandboxProps) => {
   let url, srcDoc;
   if (content) {
-    if (content.trim().slice(0, 5).toLowerCase() !== '<html') {
-      content = `<html><head><meta charset=utf-8></head><body>${content}</body>`;
+    if (!content.startsWith('<!')) {
+      content = `<!doctype html><meta charset=utf8><style>body{margin:0;height:100vh}</style><body>${content}</body>`;
     }
-    if (runInDoc) {
-      srcDoc = content;
-    } else {
-      const bolb = new Blob([content], { type: 'text/html' });
-      url = URL.createObjectURL(bolb);
-      // bolb = encodeURIComponent(html)
-      // url = 'data:text/html;charset=utf-8,' + bolb
-    }
+    console.log(content);
+    srcDoc = content;
+
+    // if (runInDoc) {
+    //   srcDoc = content;
+    // } else {
+    //   const bolb = new Blob([content], { type: 'text/html' });
+    //   url = URL.createObjectURL(bolb);
+    //   // bolb = encodeURIComponent(html)
+    //   // url = 'data:text/html;charset=utf-8,' + bolb
+    // }
   }
 
   return (
