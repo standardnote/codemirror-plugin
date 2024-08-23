@@ -4,6 +4,20 @@ import MarkdownEditor, { ICommand } from '@uiw/react-markdown-editor';
 import { Commands } from '@uiw/react-markdown-editor/cjs/components/ToolBar';
 import { Sandbox } from './Sandbox';
 
+enum AppDataField {
+  Pinned = 'pinned',
+  Archived = 'archived',
+  Locked = 'locked',
+  UserModifiedDate = 'client_updated_at',
+  DefaultEditor = 'defaultEditor',
+  MobileRules = 'mobileRules',
+  NotAvailableOnMobile = 'notAvailableOnMobile',
+  MobileActive = 'mobileActive',
+  LastSize = 'lastSize',
+  LegacyPrefersPlainEditor = 'prefersPlainEditor',
+  ComponentInstallError = 'installError',
+}
+
 enum Mode {
   editor,
   preview,
@@ -14,6 +28,7 @@ export interface EditorInterface {
   mode: Mode;
   text: string;
   colorMode: string;
+  readOnly: boolean;
 }
 
 export default class Editor extends React.Component<{}, EditorInterface> {
@@ -23,6 +38,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     mode: Mode.editor,
     text: '',
     colorMode: this.isMobile ? 'dark' : 'light',
+    readOnly: false,
   };
 
   constructor(props: EditorInterface) {
@@ -37,6 +53,10 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   configureEditorKit = () => {
     const delegate: EditorKitDelegate = {
       onNoteValueChange: async (note) => {
+        this.setState({
+          readOnly:
+            this.editorKit?.getItemAppDataValue(AppDataField.Locked) || false,
+        });
         this.onModeChange(
           this.editorKit?.getComponentDataValueForKey('mode') || Mode.editor,
         );
@@ -71,10 +91,6 @@ export default class Editor extends React.Component<{}, EditorInterface> {
       ].some((theme: string) => themes[0].includes(theme.toLowerCase()));
       this.setState({ colorMode: isDark ? 'dark' : 'light' });
     }
-  };
-
-  saveText = (text: string) => {
-    this.saveNote(text);
   };
 
   saveNote = (text: string) => {
@@ -160,7 +176,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   };
 
   render() {
-    const { text, mode, colorMode } = this.state;
+    const { text, mode, colorMode, readOnly } = this.state;
     return (
       <div
         id="sn-editor"
@@ -173,10 +189,12 @@ export default class Editor extends React.Component<{}, EditorInterface> {
           onFocus={this.onFocus}
           visible={mode === Mode.preview}
           toolbars={this.getToolbars()}
+          autoFocus={true}
+          readOnly={readOnly}
           onPreviewMode={(isPreview) =>
             this.onModeChange(isPreview ? Mode.preview : Mode.editor)
           }
-          onChange={(value, viewUpdate) => this.saveText(value)}
+          onChange={(value, viewUpdate) => this.saveNote(value)}
         />
         <Sandbox
           isVisible={mode === Mode.sandbox}
