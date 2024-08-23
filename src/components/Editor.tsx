@@ -1,11 +1,17 @@
 import React from 'react';
 import EditorKit, { EditorKitDelegate } from '@standardnotes/editor-kit';
-import MarkdownEditor from '@uiw/react-markdown-editor';
+import MarkdownEditor, { ICommand } from '@uiw/react-markdown-editor';
 import { Commands } from '@uiw/react-markdown-editor/cjs/components/ToolBar';
 import { Sandbox } from './Sandbox';
 
+enum Mode {
+  editor,
+  preview,
+  sandbox,
+}
+
 export interface EditorInterface {
-  preview: boolean;
+  mode: Mode;
   text: string;
   colorMode: string;
 }
@@ -14,7 +20,7 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   private editorKit?: EditorKit;
   private isMobile: boolean = window.innerWidth < 768;
   private initialState = {
-    preview: false,
+    mode: Mode.editor,
     text: '',
     colorMode: this.isMobile ? 'dark' : 'light',
   };
@@ -31,12 +37,12 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   configureEditorKit = () => {
     const delegate: EditorKitDelegate = {
       onNoteValueChange: async (note) => {
-        this.setState({
-          preview: this.editorKit?.getComponentDataValueForKey('mode') || false,
-        });
+        this.onModeChange(
+          this.editorKit?.getComponentDataValueForKey('mode') || Mode.editor,
+        );
       },
       setEditorRawText: (text: string) => {
-        this.setState({ text: text });
+        this.setState({ text });
       },
       clearUndoHistory: () => {},
       handleRequestForContentHeight: () => undefined,
@@ -69,12 +75,10 @@ export default class Editor extends React.Component<{}, EditorInterface> {
 
   saveText = (text: string) => {
     this.saveNote(text);
-    this.setState({
-      text: text,
-    });
   };
 
   saveNote = (text: string) => {
+    this.setState({ text });
     try {
       this.editorKit?.onEditorValueChanged(text);
     } catch (error) {
@@ -88,48 +92,93 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   onBlur = (e: React.FocusEvent) =>
     this.editorKit?.componentRelay?.sendCustomEvent('blur', {});
 
-  onPreviewMode = (isPreview: boolean) => {
-    document.querySelector('.sn-editor')!.className = isPreview
-      ? 'sn-editor sn-preview'
-      : 'sn-editor';
-    this.editorKit?.setComponentDataValueForKey('mode', isPreview);
+  getEditorClassName = (mode: Mode) =>
+    mode === Mode.preview
+      ? 'sn-preview'
+      : mode === Mode.sandbox
+        ? 'sn-sandbox'
+        : '';
+
+  onModeChange = (mode: Mode) => {
+    if (this.state.mode !== mode) {
+      this.editorKit?.setComponentDataValueForKey('mode', mode);
+      this.setState({ mode });
+      document.getElementById('sn-editor')!.className =
+        this.getEditorClassName(mode);
+    }
   };
 
-  private toolbars: Commands[] = this.isMobile
-    ? ['undo', 'redo', 'bold', 'italic']
-    : [
-        'undo',
-        'redo',
-        'bold',
-        'italic',
-        'header',
-        'strike',
-        'underline',
-        'code',
-        'quote',
-        'olist',
-        'ulist',
-        'todo',
-        'link',
-        'image',
-      ];
+  getToolbars = (): Commands[] => {
+    const exec: ICommand = {
+      name: 'exec',
+      keyCommand: 'exec',
+      icon: (
+        <svg viewBox="0 0 48 48" fill="none" height="15" width="15">
+          <path
+            d="M21 6H9a3 3 0 0 0-3 3v22a3 3 0 0 0 3 3h30a3 3 0 0 0 3-3V21M24 34v8"
+            stroke="currentColor"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="m32 6-4 4 4 4m6-8 4 4-4 4M14 42h20"
+            stroke="currentColor"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      ),
+      execute: ({ state, view }) => {
+        if (!state || !view) return;
+        this.onModeChange(
+          this.state.mode !== Mode.sandbox ? Mode.sandbox : Mode.editor,
+        );
+      },
+    };
+
+    return this.isMobile
+      ? ['undo', 'redo', 'bold', 'italic', exec]
+      : [
+          'undo',
+          'redo',
+          'bold',
+          'italic',
+          'header',
+          'strike',
+          'underline',
+          'code',
+          'quote',
+          'olist',
+          'ulist',
+          'todo',
+          'link',
+          'image',
+          exec,
+        ];
+  };
 
   render() {
-    const { text, preview, colorMode } = this.state;
+    const { text, mode, colorMode } = this.state;
     return (
       <div
-        className={preview ? 'sn-editor sn-preview' : 'sn-editor'}
+        id="sn-editor"
+        className={this.getEditorClassName(mode)}
         data-color-mode={colorMode}
       >
         <MarkdownEditor
           value={text}
           onBlur={this.onBlur}
           onFocus={this.onFocus}
-          visible={preview}
-          toolbars={this.toolbars}
-          onPreviewMode={this.onPreviewMode}
+          visible={mode === Mode.preview}
+          toolbars={this.getToolbars()}
+          onPreviewMode={(isPreview) =>
+            this.onModeChange(isPreview ? Mode.preview : Mode.editor)
+          }
           onChange={(value, viewUpdate) => this.saveText(value)}
         />
+        <Sandbox isVisible={mode === Mode.sandbox} content={text} />
       </div>
     );
   }
