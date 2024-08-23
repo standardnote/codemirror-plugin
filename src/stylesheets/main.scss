@@ -124,7 +124,7 @@ code {
 #root {
   display: flex;
   flex-direction: column;
-  font-size: var(--sn-stylekit-font-size-editor);
+  font-size: var(--sn-stylekit-font-size-editor, 14px);
   min-height: 100vh;
 
   @media screen and (max-width: 420px) {
