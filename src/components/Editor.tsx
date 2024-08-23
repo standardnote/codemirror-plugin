@@ -3,6 +3,7 @@ import EditorKit, { EditorKitDelegate } from '@standardnotes/editor-kit';
 import MarkdownEditor, { ICommand } from '@uiw/react-markdown-editor';
 import { Commands } from '@uiw/react-markdown-editor/cjs/components/ToolBar';
 import { Sandbox } from './Sandbox';
+import type { OutgoingItemMessagePayload } from '@standardnotes/snjs';
 
 enum AppDataField {
   Pinned = 'pinned',
@@ -18,14 +19,14 @@ enum AppDataField {
   ComponentInstallError = 'installError',
 }
 
-enum Mode {
-  editor,
-  preview,
-  sandbox,
+enum DisplayMode {
+  editor = 'edit',
+  preview = 'preview',
+  sandbox = 'split',
 }
 
 export interface EditorInterface {
-  mode: Mode;
+  mode: DisplayMode;
   text: string;
   colorMode: string;
   readOnly: boolean;
@@ -35,11 +36,12 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   private editorKit?: EditorKit;
   private isMobile: boolean = window.innerWidth < 768;
   private initialState = {
-    mode: Mode.editor,
+    mode: DisplayMode.editor,
     text: '',
     colorMode: this.isMobile ? 'dark' : 'light',
     readOnly: false,
   };
+  private note?: OutgoingItemMessagePayload;
 
   constructor(props: EditorInterface) {
     super(props);
@@ -53,12 +55,14 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   configureEditorKit = () => {
     const delegate: EditorKitDelegate = {
       onNoteValueChange: async (note) => {
+        this.note = note;
         this.setState({
           readOnly:
             this.editorKit?.getItemAppDataValue(AppDataField.Locked) || false,
         });
         this.onModeChange(
-          this.editorKit?.getComponentDataValueForKey('mode') || Mode.editor,
+          // this.editorKit?.getComponentDataValueForKey('mode') || DisplayMode.editor
+          (note.clientData?.mode as DisplayMode) || DisplayMode.editor,
         );
       },
       setEditorRawText: (text: string) => {
@@ -102,22 +106,34 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     }
   };
 
+  saveMetadata = (key: string, value: any) => {
+    if (!this.note) return;
+    const note = this.note;
+    this.editorKit?.componentRelay?.saveItemWithPresave(note, () => {
+      note.clientData = {
+        ...note.clientData,
+        [key]: value,
+      };
+    });
+  };
+
   onFocus = (e: React.FocusEvent) =>
     this.editorKit?.componentRelay?.sendCustomEvent('focus', {});
 
   onBlur = (e: React.FocusEvent) =>
     this.editorKit?.componentRelay?.sendCustomEvent('blur', {});
 
-  getEditorClassName = (mode: Mode) =>
-    mode === Mode.preview
+  getEditorClassName = (mode: DisplayMode) =>
+    mode === DisplayMode.preview
       ? 'sn-preview'
-      : mode === Mode.sandbox
+      : mode === DisplayMode.sandbox
         ? 'sn-sandbox'
         : '';
 
-  onModeChange = (mode: Mode) => {
+  onModeChange = (mode: DisplayMode) => {
     if (this.state.mode !== mode) {
-      this.editorKit?.setComponentDataValueForKey('mode', mode);
+      // this.editorKit?.setComponentDataValueForKey('mode', mode);
+      this.saveMetadata('mode', mode);
       this.setState({ mode });
       document.getElementById('sn-editor')!.className =
         this.getEditorClassName(mode);
@@ -149,7 +165,9 @@ export default class Editor extends React.Component<{}, EditorInterface> {
       execute: ({ state, view }) => {
         if (!state || !view) return;
         this.onModeChange(
-          this.state.mode !== Mode.sandbox ? Mode.sandbox : Mode.editor,
+          this.state.mode !== DisplayMode.sandbox
+            ? DisplayMode.sandbox
+            : DisplayMode.editor,
         );
       },
     };
@@ -187,17 +205,19 @@ export default class Editor extends React.Component<{}, EditorInterface> {
           value={text}
           onBlur={this.onBlur}
           onFocus={this.onFocus}
-          visible={mode === Mode.preview}
+          visible={mode === DisplayMode.preview}
           toolbars={this.getToolbars()}
           autoFocus={true}
           readOnly={readOnly}
           onPreviewMode={(isPreview) =>
-            this.onModeChange(isPreview ? Mode.preview : Mode.editor)
+            this.onModeChange(
+              isPreview ? DisplayMode.preview : DisplayMode.editor,
+            )
           }
           onChange={(value, viewUpdate) => this.saveNote(value)}
         />
         <Sandbox
-          isVisible={mode === Mode.sandbox}
+          isVisible={mode === DisplayMode.sandbox}
           content={text}
           runInDoc={this.isMobile}
         />
