@@ -178,7 +178,11 @@ export default class Editor extends React.Component<{}, EditorInterface> {
           }
           onChange={(value, viewUpdate) => this.saveText(value)}
         />
-        <Sandbox isVisible={mode === Mode.sandbox} content={text} />
+        <Sandbox
+          isVisible={mode === Mode.sandbox}
+          content={text}
+          runInDoc={this.isMobile}
+        />
       </div>
     );
   }
