@@ -1,0 +1,13 @@
+diff --git a/node_modules/@standardnotes/editor-kit/dist/@types/EditorKit.d.ts b/node_modules/@standardnotes/editor-kit/dist/@types/EditorKit.d.ts
+index 21daee5..1fc55ec 100644
+--- a/node_modules/@standardnotes/editor-kit/dist/@types/EditorKit.d.ts
++++ b/node_modules/@standardnotes/editor-kit/dist/@types/EditorKit.d.ts
+@@ -6,7 +6,7 @@ declare type NoteMessagePayload = DecryptedTransferPayload<NoteContent> & Outgoi
+ export default class EditorKit {
+     private delegate;
+     private options;
+-    private componentRelay?;
++    public componentRelay?;
+     private note?;
+     private ignoreNextTextChange?;
+     constructor(delegate: EditorKitDelegate, options: EditorKitOptions);
